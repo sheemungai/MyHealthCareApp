@@ -63,7 +63,7 @@ export type AuthStoreType = AuthState & AuthActions;
 
 
 export interface TDoctor {
-  doctor_id: number;
+  doctor_id: number | string;
   name: string;
   email: string;
   specialization: string;

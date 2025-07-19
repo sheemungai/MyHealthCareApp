@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import {
   FaUserMd,
-  FaProcedures,
   FaCalendarAlt,
   FaUserFriends,
   FaChartLine,
@@ -19,6 +18,15 @@ interface SideNavProps {
 }
 
 export default function SideNav({ role }: SideNavProps) {
+
+   const commonNavItems = [
+    { 
+      icon: <MdDashboard size={20} />, 
+      label: 'Dashboard', 
+      to: '/dashboard' 
+    },
+    
+  ]
   // Role-specific navigation items
   const roleNavItems = {
     admin: [
@@ -146,7 +154,7 @@ export default function SideNav({ role }: SideNavProps) {
     ],
   }
 
-  const navItems = [...(roleNavItems[role] || [])]
+  const navItems = [...commonNavItems,...(roleNavItems[role] || [])]
 
   return (
     <nav className="h-full bg-white border-r border-gray-200 flex flex-col">

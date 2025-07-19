@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion' // Import framer-motion for animations
 
 type Doctor = {
-  doctor_id: number
+  doctor_id: number | string
   name: string
   specialization: string
   email: string
@@ -14,7 +14,7 @@ type Doctor = {
 
 const DoctorsList = () => {
   const { data: doctors, isLoading, isError } = useGetDoctorQuery()
-  console.log("Doctors data:", doctors);
+  console.log('Doctors data:', doctors)
 
   if (isLoading) {
     return (

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGetMedicineQuery } from '@/hooks/patients/medicine';
 import { motion } from 'framer-motion';
 import OrderMedicineModal from './ordersForm';
+import { getUserIdHelper } from '@/lib/authHelper';
 
 type Medicine = {
   medicine_id: number;
@@ -56,10 +57,11 @@ const MedicinesList = () => {
     </div>
   );
 };
-
+``
 const MedicineCard = ({ medicine, index }: { medicine: Medicine; index: number }) => {
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const patientId = 1; // Replace with actual patient ID from auth context
+  const patientId = getUserIdHelper();
+  
 
   const handleOrderSuccess = (orderData: any) => {
     console.log('Order created:', orderData);
@@ -191,7 +193,7 @@ const MedicineCard = ({ medicine, index }: { medicine: Medicine; index: number }
             name: medicine.name,
             price: medicine.price
           }}
-          patientId={patientId}
+          patientId={Number(patientId)}
           onClose={() => setShowOrderModal(false)}
           onSuccess={handleOrderSuccess}
         />

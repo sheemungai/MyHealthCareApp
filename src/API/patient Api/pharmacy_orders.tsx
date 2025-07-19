@@ -1,42 +1,43 @@
-import url from "@/constants/urls";
-import { getAccessTokenHelper } from "@/lib/authHelper";
+import url from '@/constants/urls'
+import { getAccessTokenHelper } from '@/lib/authHelper'
 
 export const getPharmacyOrdersFn = async (patientId: number) => {
-  const fullUrl = `${url}/patients/pharmacy_orders/${patientId}`;
-  const token = getAccessTokenHelper();
+  const fullUrl = `${url}/patients/pharmacy_orders/${patientId}`
+  const token = getAccessTokenHelper()
 
   const response = await fetch(fullUrl, {
-    method: "GET",
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      "Authorization": `Bearer ${token}`
-    }
-  });
+      Authorization: `Bearer ${token}`,
+    },
+  })
 
   if (!response.ok) {
-    throw new Error('Failed to fetch pharmacy orders');
+    throw new Error('Failed to fetch pharmacy orders')
   }
 
-  const data = await response.json();
-  return Array.isArray(data) ? data : [data]; // Ensure we return an array
+  const data = await response.json()
+  return Array.isArray(data) ? data : [data] // Ensure we return an array
 }
 
 export const createPharmacyOrderFn = async (orderData: any) => {
-  const fullUrl = `${url}/patients/pharmacy_orders`;
-  const token = getAccessTokenHelper();
+  const fullUrl = `${url}/pharmacy-orders`
+  const token = getAccessTokenHelper()
 
   const response = await fetch(fullUrl, {
-    method: "POST",
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      "Authorization": `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(orderData)
-  });
+    body: JSON.stringify(orderData),
+  })
 
-  if (!response.ok) {
-    throw new Error('Failed to create pharmacy order');
-  }
+  // if (!response.ok) {
+  //   throw new Error('Failed to create pharmacy order');
+  // }
 
-  return await response.json();
+  const data = await response.json()
+  return data // Return the created order data
 }
