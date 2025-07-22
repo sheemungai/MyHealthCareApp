@@ -19,14 +19,14 @@ interface SideNavProps {
 
 export default function SideNav({ role }: SideNavProps) {
 
-   const commonNavItems = [
-    { 
-      icon: <MdDashboard size={20} />, 
-      label: 'Dashboard', 
-      to: '/dashboard' 
-    },
+  //  const commonNavItems = [
+  //   { 
+  //     icon: <MdDashboard size={20} />, 
+  //     label: 'Dashboard', 
+  //     to: '/dashboard' 
+  //   },
     
-  ]
+  // ]
   // Role-specific navigation items
   const roleNavItems = {
     admin: [
@@ -82,6 +82,8 @@ export default function SideNav({ role }: SideNavProps) {
       },
     ],
     doctor: [
+
+      
       {
         icon: <FaCalendarAlt size={18} />,
         label: 'Appointments',
@@ -154,7 +156,7 @@ export default function SideNav({ role }: SideNavProps) {
     ],
   }
 
-  const navItems = [...commonNavItems,...(roleNavItems[role] || [])]
+  const navItems =([...(roleNavItems[role] || [])])
 
   return (
     <nav className="h-full bg-white border-r border-gray-200 flex flex-col">

@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import Header from '../components/Header'
 import type { QueryClient } from '@tanstack/react-query'
+import AiAssistant from '@/components/AiAssistant'
 
 interface MyRouteContext {
   queryClient: QueryClient
@@ -17,6 +18,7 @@ export const Route = createRootRoute < MyRouteContext>({
 
       <Outlet />
       <TanStackRouterDevtools />
+      <AiAssistant />
     </>
   ),
 })

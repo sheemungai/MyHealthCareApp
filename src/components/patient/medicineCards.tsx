@@ -57,7 +57,7 @@ const MedicinesList = () => {
     </div>
   );
 };
-``
+
 const MedicineCard = ({ medicine, index }: { medicine: Medicine; index: number }) => {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const patientId = getUserIdHelper();
