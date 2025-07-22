@@ -1,45 +1,57 @@
 import { useState, useRef, useEffect } from 'react'
 import { FaRobot, FaPaperPlane, FaTimes } from 'react-icons/fa'
 import { MdSmartToy } from 'react-icons/md'
-
-export const VITE_API_KEY = import.meta.env.VITE_API_KEY
-// console.log('VITE_API_KEY:', VITE_API_KEY)
+import { useAiModel } from '@/hooks/aimodelHook'
 
 const AiAssistant = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<
-    Array<{ text: string; isUser: boolean }>
-  >([])
   const [inputValue, setInputValue] = useState('')
+  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>(
+    [],
+  )
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const handleSendMessage = () => {
-    if (inputValue.trim() === '') return
+  const askAva = useAiModel() // Custom hook to call AI
 
-    // Add user message
-    setMessages((prev) => [...prev, { text: inputValue, isUser: true }])
-    setInputValue('')
+const handleSendMessage = async () => {
+  const trimmed = inputValue.trim()
+  if (!trimmed) return
 
-    // Simulate AI response after a delay
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          text: `I'm your AI assistant. I received: "${inputValue}". How can I help you further?`,
-          isUser: false,
-        },
-      ])
-    }, 1000)
+  // Append user's message
+  const userMessage = { text: trimmed, isUser: true }
+  setMessages((prev) => [...prev, userMessage])
+  setInputValue('')
+
+  try {
+    // Get AI response
+    const response = await askAva.mutateAsync({
+      message: trimmed,
+    })
+
+    if ((response as any)?.data?.reply) {
+      const aiMessage = { text: (response as any).data.reply, isUser: false }
+      setMessages((prev) => [...prev, aiMessage])
+    }
+    console.log('AI response:', response)
+  } catch (error) {
+    setMessages((prev) => [
+      ...prev,
+      {
+        text: 'Sorry, there was an error getting a response.',
+        isUser: false,
+      },
+    ])
   }
+}
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      e.preventDefault()
       handleSendMessage()
     }
   }
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
@@ -96,13 +108,14 @@ const AiAssistant = () => {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 placeholder="Type your message..."
                 className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 onClick={handleSendMessage}
                 className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700 transition"
+                // disabled={isLoading}
               >
                 <FaPaperPlane />
               </button>
