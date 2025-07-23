@@ -90,6 +90,7 @@ export interface TAppointment {
   doctor_id: number;
   appointment_time: string;
   status: string;
+  payment_status: string;
   reason: string;
   created_at: string;
 }

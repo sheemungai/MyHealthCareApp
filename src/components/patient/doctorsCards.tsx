@@ -8,7 +8,7 @@ type Doctor = {
   specialization: string
   email: string
   availability: string
-  consultation_fee?: number
+  consultation_fee?: string
   img?: string | null
 }
 
