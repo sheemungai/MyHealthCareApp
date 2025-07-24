@@ -48,7 +48,7 @@ export const deletePaymentsFn = async (paymentId: number): Promise<void> => {
 }
 
 export const initPaymentFn = async (paymentData: TPayment): Promise<TPayment> => {
-  const fullUrl = `${url}/payments`;
+  const fullUrl = `${url}/payments/init`;
 
   const response = await fetch(fullUrl, {
     method: 'POST',

@@ -1,16 +1,16 @@
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { initPaymentFn, verifyPaymentFn } from "@/API/payments"
-import { useQuery } from "@tanstack/react-query"
 
-export const useInitPayments = (payments: any) => {
-    useQuery({
-        queryKey: ['initPayments'],
-        queryFn: () => initPaymentFn(payments),
-    })
+export const useInitPayments = () => {
+  return useMutation({
+    mutationFn: (paymentData: any) => initPaymentFn(paymentData),
+  })
 }
 
 export const useVerifyPayment = () => {
-    return useQuery({
-        queryKey: ['verifyPayment'],
-        queryFn: () => verifyPaymentFn(),
-    })
+  return useQuery({
+    queryKey: ['verifyPayment'],
+    queryFn: () => verifyPaymentFn(),
+    enabled: false, // We'll manually trigger this when needed
+  })
 }

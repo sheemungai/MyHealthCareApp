@@ -38,12 +38,9 @@ export const postAppointmentFn = async () => {
         'Authorization': `Bearer ${getAccessTokenHelper()}`,
         },
     });
-    
-    if (!response.ok) {
-        throw new Error('Failed to post appointment');
-    }
-    
-    return response.json();
+   
+    const data = await response.json();
+    return data;
 }
 
 export const getAppointmentsFn = async (patient_id: number) => {
