@@ -1,16 +1,22 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { initPaymentFn, verifyPaymentFn } from "@/API/payments"
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { initPaymentFn, verifyPaymentFn } from '@/API/payments'
 
 export const useInitPayments = () => {
   return useMutation({
     mutationFn: (paymentData: any) => initPaymentFn(paymentData),
+    onSuccess: (data) => {
+      console.log('Payment initialization successful:', data)
+    },
+    onError: (error) => {
+      console.error('Payment initialization failed:', error)
+    },
   })
 }
 
-export const useVerifyPayment = () => {
+export const useVerifyPayment = (reference?: string) => {
   return useQuery({
-    queryKey: ['verifyPayment'],
+    queryKey: ['verifyPayment', reference],
     queryFn: () => verifyPaymentFn(),
-    enabled: false, // We'll manually trigger this when needed
+    enabled: !!reference, // Only run when we have a reference
   })
 }

@@ -1,13 +1,18 @@
 import { useEffect } from 'react'
 import { useVerifyPayment } from '@/hooks/payments/paymentHook'
-import { useLocation } from '@tanstack/react-router'  // or next/router if using Next.js
+import { useLocation } from '@tanstack/react-router'
 
-export const PaymentVerification = () => {
+interface PaymentVerificationProps {
+  onSuccess: () => void
+  onError: () => void
+}
+
+export const PaymentVerification = ({ onSuccess, onError }: PaymentVerificationProps) => {
   const location = useLocation()
-  const { data: verificationData, refetch: verifyPayment } = useVerifyPayment()
+  const { data: verificationData, refetch: verifyPayment, isError } = useVerifyPayment()
 
   useEffect(() => {
-    // Check if URL contains payment reference (this depends on how Paystack redirects)
+    // Check for payment reference in URL
     const queryParams = new URLSearchParams(location.search)
     const reference = queryParams.get('reference')
     
@@ -20,9 +25,15 @@ export const PaymentVerification = () => {
     if (verificationData) {
       // Handle successful verification
       console.log('Payment verified:', verificationData)
-      // You might want to show a success message or update the UI
+      onSuccess()
     }
-  }, [verificationData])
+  }, [verificationData, onSuccess])
+
+  useEffect(() => {
+    if (isError) {
+      onError()
+    }
+  }, [isError, onError])
 
   return null
 }

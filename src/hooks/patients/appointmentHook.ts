@@ -14,8 +14,15 @@ export const useCreateAppointment = () => {
       appointment_time: Date
       created_at: Date
     }) => createAppointmentFn(appointmentData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] })
+    onSuccess: (data, variables) => {
+      // Invalidate appointments for the specific patient
+      queryClient.invalidateQueries({
+        queryKey: ['appointments', variables.patient_id],
+      })
+      // Also invalidate all appointment queries just in case
+      queryClient.invalidateQueries({
+        queryKey: ['appointments'],
+      })
     },
   })
 }

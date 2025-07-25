@@ -140,6 +140,8 @@ export interface TPayment {
   pharmacy_order_id: number;
   created_at: string;
   amount: number; 
+  authorization_url: string;
+  payment_reference: string;
   status: string;
 }
   
