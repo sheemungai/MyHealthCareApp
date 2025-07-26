@@ -126,6 +126,11 @@ export default function SideNav({ role }: SideNavProps) {
         label: 'Pharmacy Orders',
         to: '/dashboard/patient/pharmacy_orders',
       },
+       {
+        icon: <FaPrescriptionBottleAlt size={18} />,
+        label: 'Prescriptions',
+        to: '/dashboard/patient/prescriptions',
+      },
     ],
     pharmacist: [
       {

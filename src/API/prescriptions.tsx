@@ -1,6 +1,6 @@
 // API/patients.ts
 import url from "@/constants/urls";
-import { getAccessTokenHelper } from "@/lib/authHelper";
+import { getAccessTokenHelper, getUserIdHelper } from "@/lib/authHelper";
 import type { TPrescription } from "@/Types/types";
 
 export const getPrescriptionsFn = async (page = 1, limit = 10, search = ''): Promise<{
@@ -77,4 +77,24 @@ export const updatePrescriptionFn = async ({
   }
 
   return response.json();
+}
+
+export const getPatientPrescriptionsFn = async () => {
+  const userId = getUserIdHelper();
+  const fullUrl = `${url}/patients/prescriptions/${userId}`;
+  const token = getAccessTokenHelper();
+
+  const response = await fetch(fullUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch prescriptions');
+  }
+
+  return response.json(); 
 }

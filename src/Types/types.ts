@@ -93,6 +93,8 @@ export interface TAppointment {
   payment_status: string;
   reason: string;
   created_at: string;
+  join_url?: string;
+  authorization_url?: string;
 }
 
 export interface TPrescription {
@@ -139,6 +141,8 @@ export interface TPayment {
   payment_method: string;
   pharmacy_order_id: number;
   created_at: string;
+  authorization_url: string;
+  payment_reference: string;
   amount: number; 
   status: string;
 }

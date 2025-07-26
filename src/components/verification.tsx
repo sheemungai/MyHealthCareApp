@@ -4,7 +4,7 @@ import { useLocation } from '@tanstack/react-router'  // or next/router if using
 
 export const PaymentVerification = () => {
   const location = useLocation()
-  const { data: verificationData, refetch: verifyPayment } = useVerifyPayment()
+  const { data: verificationData, mutate: verifyPayment } = useVerifyPayment()
 
   useEffect(() => {
     // Check if URL contains payment reference (this depends on how Paystack redirects)
@@ -12,7 +12,7 @@ export const PaymentVerification = () => {
     const reference = queryParams.get('reference')
     
     if (reference) {
-      verifyPayment()
+      verifyPayment(reference)
     }
   }, [location, verifyPayment])
 

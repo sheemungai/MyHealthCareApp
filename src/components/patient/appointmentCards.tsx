@@ -1,4 +1,7 @@
+import { useState, useEffect } from 'react'
 import { useGetAppointmentsByIdQuery } from '@/hooks/patients/appointmentHook'
+import { useInitPayments, useVerifyPayment } from '@/hooks/payments/paymentHook'
+import { getUserEmailHelper } from '@/lib/authHelper'
 
 interface AppointmentCardProps {
   appointment: {
@@ -10,10 +13,26 @@ interface AppointmentCardProps {
     status: string
     reason: string
     created_at: string
+    authorization_url?: string
+    payment_reference?: string
+    join_url?: string
+    payment_id?: number
   }
+  onPaymentVerified?: () => void
 }
 
-const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
+const AppointmentCard = ({
+  appointment,
+  onPaymentVerified,
+}: AppointmentCardProps) => {
+  console.log('AppointmentCard rendered with appointment:', appointment)
+  const initPaymentMutation = useInitPayments()
+  const verifyPaymentMutation = useVerifyPayment()
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(
+    null,
+  )
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
@@ -38,6 +57,109 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
     }
   }
 
+  const verifyPayment = async (reference: string) => {
+    try {
+      setIsVerifying(true)
+      setVerificationError(null)
+
+      const result = await verifyPaymentMutation.mutateAsync(appointment.appointment_id)
+
+      if (result.payment?.status === 'completed') {
+        localStorage.removeItem('pending_payment_ref')
+        localStorage.removeItem('appointment_id')
+        onPaymentVerified?.()
+      }
+    } catch (error) {
+      console.error('Payment verification failed:', error)
+      setVerificationError(
+        'Payment verification failed. Please refresh to check status.',
+      )
+    } finally {
+      setIsVerifying(false)
+    }
+  }
+
+  // Check for pending payments on mount
+  useEffect(() => {
+    const pendingRef = localStorage.getItem('pending_payment_ref')
+    const storedAppointmentId = localStorage.getItem('appointment_id')
+
+    if (
+      pendingRef &&
+      storedAppointmentId &&
+      parseInt(storedAppointmentId) === appointment.appointment_id
+    ) {
+      verifyPayment(pendingRef)
+    }
+  }, [])
+
+  const handlePayment = async () => {
+    console.log('handlePayment called')
+
+    if (appointment.authorization_url) {
+      // Store payment reference for verification
+      if (appointment.payment_reference) {
+        localStorage.setItem(
+          'pending_payment_ref',
+          appointment.payment_reference,
+        )
+        localStorage.setItem(
+          'appointment_id',
+          appointment.appointment_id.toString(),
+        )
+      }
+
+      // Open payment page and start verification
+      window.open(appointment.authorization_url, '_blank')
+      if (appointment.payment_reference) {
+        verifyPayment(appointment.payment_reference)
+      }
+    } else {
+      // Initialize new payment
+      try {
+        console.log('Initializing new payment...')
+        const paymentData = {
+          appointment_id: appointment.appointment_id,
+          patient_id: appointment.patient_id,
+          email: getUserEmailHelper(),
+          doctor_id: appointment.doctor_id,
+          payment_method: 'paystack',
+          pharmacy_order_id: 0,
+          status: 'pending',
+        }
+
+        const result = await initPaymentMutation.mutateAsync(paymentData)
+        console.log('Payment initialization result:', result)
+
+        if (result.authorization_url && result.payment_reference) {
+          localStorage.setItem('pending_payment_ref', result.payment_reference)
+          localStorage.setItem(
+            'appointment_id',
+            appointment.appointment_id.toString(),
+          )
+
+          window.open(result.authorization_url, '_blank')
+          verifyPayment(result.payment_reference)
+        }
+      } catch (error: any) {
+        console.error('Payment initialization failed:', error)
+        alert(
+          `Failed to initialize payment. Error: ${error?.message || 'Unknown error'}`,
+        )
+      }
+    }
+  }
+
+  const getPaymentButtonText = () => {
+    if (initPaymentMutation.isPending) return 'Initializing Payment...'
+    if (isVerifying) return 'Verifying Payment...'
+    if (appointment.payment_status === 'completed') return 'Payment Completed'
+    if (appointment.payment_status === 'pending') return 'Verify Payment'
+
+
+    return 'Make Payment'
+  }
+
   return (
     <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-200">
       <div className="flex justify-between items-start mb-4">
@@ -45,9 +167,7 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
           Appointment #{appointment.appointment_id}
         </h3>
         <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-            appointment.status,
-          )}`}
+          className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}
         >
           {appointment.status}
         </span>
@@ -59,7 +179,7 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
           {formatDate(appointment.appointment_time)}
         </p>
         <p className="text-gray-600">
-          <span className="font-medium">Doctor :</span> {appointment.doctor_id}
+          <span className="font-medium">Doctor:</span> {appointment.doctor_id}
         </p>
         <p className="text-gray-600">
           <span className="font-medium">Reason:</span> {appointment.reason}
@@ -68,16 +188,41 @@ const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
           <span className="font-medium">Created:</span>{' '}
           {formatDate(appointment.created_at)}
         </p>
-        <br></br>
+
+        {verificationError && (
+          <p className="text-red-500 text-sm">{verificationError}</p>
+        )}
       </div>
 
-      {appointment.payment_status === 'unpaid' || appointment.payment_status === 'pending' ? (
-        <button className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500 transition-colors">make payment</button>
-      ) : (
-        <button className="bg-green-400 text-white px-4 py-2 rounded hover:bg-green-500 transition-colors">
-          Payment Completed
-        </button>
-      )}
+      <div className="mt-4">
+        {appointment.payment_status === 'unpaid' ||
+        appointment.payment_status === 'pending' ? (
+          <button
+            onClick={handlePayment}
+            disabled={initPaymentMutation.isPending || isVerifying}
+            className={`w-full px-4 py-2 rounded text-white ${
+              initPaymentMutation.isPending || isVerifying
+                ? 'bg-yellow-500'
+                : 'bg-blue-500 hover:bg-blue-600'
+            } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {getPaymentButtonText()}
+          </button>
+        ) : (
+          <button className="w-full px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition-colors">
+            Payment Completed
+          </button>
+        )}
+      </div>
+      <br />
+        <a
+          href={`https://zoom.us/join?confno=${appointment.join_url}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Join Zoom Meeting
+        </a>
+      
     </div>
   )
 }
@@ -88,28 +233,27 @@ export const PatientAppointments = ({ patientId }: { patientId: number }) => {
     isLoading,
     isError,
     error,
+    refetch,
   } = useGetAppointmentsByIdQuery(patientId)
 
-  console.log('Appointments Data:', appointments)
-
-  if (isLoading) {
-    return <div className="text-center py-8">Loading appointments...</div>
+  const handleRefresh = () => {
+    refetch()
   }
 
-  if (isError) {
+  if (isLoading)
+    return <div className="text-center py-8">Loading appointments...</div>
+  if (isError)
     return (
       <div className="text-center py-8 text-red-500">
         Error: {error.message}
       </div>
     )
-  }
 
-  // Check if appointments exists and is an array
   const appointmentsArray = Array.isArray(appointments)
     ? appointments
-    : [appointments]
+    : [appointments].filter(Boolean)
 
-  if (!appointmentsArray || appointmentsArray.length === 0) {
+  if (!appointmentsArray.length) {
     return (
       <div className="text-center py-8 text-gray-500">
         No appointments found for this patient.
@@ -119,15 +263,25 @@ export const PatientAppointments = ({ patientId }: { patientId: number }) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Patient Appointments
-      </h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Patient Appointments
+        </h2>
+        <button
+          onClick={handleRefresh}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Loading...' : 'Refresh'}
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {appointmentsArray.map((appointment) => (
           <AppointmentCard
             key={appointment.appointment_id}
             appointment={appointment}
+            onPaymentVerified={handleRefresh}
           />
         ))}
       </div>

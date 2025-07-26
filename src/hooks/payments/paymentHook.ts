@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation} from "@tanstack/react-query"
 import { initPaymentFn, verifyPaymentFn } from "@/API/payments"
 
 export const useInitPayments = () => {
@@ -8,9 +8,7 @@ export const useInitPayments = () => {
 }
 
 export const useVerifyPayment = () => {
-  return useQuery({
-    queryKey: ['verifyPayment'],
-    queryFn: () => verifyPaymentFn(),
-    enabled: false, // We'll manually trigger this when needed
+  return useMutation({
+    mutationFn: (reference: number) => verifyPaymentFn(reference),
   })
 }

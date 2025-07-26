@@ -66,8 +66,8 @@ export const initPaymentFn = async (paymentData: TPayment): Promise<TPayment> =>
   return response.json();
 }
 
-export const verifyPaymentFn = async () => {
-  const fullUrl = `${url}/payments`;
+export const verifyPaymentFn = async (reference: number) => {
+  const fullUrl = `${url}/payments/callback/${reference}`;
 
   const response = await fetch(fullUrl, {
     method: 'GET',
