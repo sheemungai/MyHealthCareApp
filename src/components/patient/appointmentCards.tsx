@@ -57,12 +57,14 @@ const AppointmentCard = ({
     }
   }
 
-  const verifyPayment = async (reference: string) => {
+  const verifyPayment = async (appointment_id: number) => {
     try {
       setIsVerifying(true)
       setVerificationError(null)
 
-      const result = await verifyPaymentMutation.mutateAsync(appointment.appointment_id)
+      const result = await verifyPaymentMutation.mutateAsync(
+      appointment_id,
+      )
 
       if (result.payment?.status === 'completed') {
         localStorage.removeItem('pending_payment_ref')
@@ -89,12 +91,20 @@ const AppointmentCard = ({
       storedAppointmentId &&
       parseInt(storedAppointmentId) === appointment.appointment_id
     ) {
-      verifyPayment(pendingRef)
+      verifyPayment(appointment.appointment_id)
     }
   }, [])
 
   const handlePayment = async () => {
     console.log('handlePayment called')
+
+    if (appointment.payment_status === 'pending') {
+      console.log('Payment is pending, verifying...')
+      setIsVerifying(true)
+      await verifyPayment(Number(appointment.appointment_id) || 0)
+      setIsVerifying(false)
+      return
+    }
 
     if (appointment.authorization_url) {
       // Store payment reference for verification
@@ -111,8 +121,8 @@ const AppointmentCard = ({
 
       // Open payment page and start verification
       window.open(appointment.authorization_url, '_blank')
-      if (appointment.payment_reference) {
-        verifyPayment(appointment.payment_reference)
+      if (appointment.appointment_id) {
+        verifyPayment(appointment.appointment_id)
       }
     } else {
       // Initialize new payment
@@ -139,7 +149,7 @@ const AppointmentCard = ({
           )
 
           window.open(result.authorization_url, '_blank')
-          verifyPayment(result.payment_reference)
+          verifyPayment(result.appointment_id)
         }
       } catch (error: any) {
         console.error('Payment initialization failed:', error)
@@ -151,11 +161,14 @@ const AppointmentCard = ({
   }
 
   const getPaymentButtonText = () => {
+    console.log('appointment.payment_status:', appointment.payment_status)
+
     if (initPaymentMutation.isPending) return 'Initializing Payment...'
     if (isVerifying) return 'Verifying Payment...'
     if (appointment.payment_status === 'completed') return 'Payment Completed'
     if (appointment.payment_status === 'pending') return 'Verify Payment'
 
+    if (appointment.payment_status === 'unpaid') return 'Make Payment'
 
     return 'Make Payment'
   }
@@ -215,14 +228,13 @@ const AppointmentCard = ({
         )}
       </div>
       <br />
-        <a
-          href={`https://zoom.us/join?confno=${appointment.join_url}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Join Zoom Meeting
-        </a>
-      
+      <a
+        href={`https://zoom.us/join?confno=${appointment.join_url}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Join Zoom Meeting
+      </a>
     </div>
   )
 }
