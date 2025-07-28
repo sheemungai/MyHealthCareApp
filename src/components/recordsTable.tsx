@@ -17,7 +17,7 @@ export const RecordsTable = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-  const [isCreating, setIsCreating] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
     patient_id: '',
     doctor_id: '',
@@ -43,7 +43,7 @@ export const RecordsTable = () => {
   };
 
   const handleCreateClick = () => {
-    setIsCreating(true);
+    setShowCreateModal(true);
     setFormData({
       patient_id: '',
       doctor_id: '',
@@ -53,7 +53,7 @@ export const RecordsTable = () => {
   };
 
   const handleCancel = () => {
-    setIsCreating(false);
+    setShowCreateModal(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,7 +67,7 @@ export const RecordsTable = () => {
       };
       
       await createMutation.mutateAsync(submissionData);
-      setIsCreating(false);
+      setShowCreateModal(false);
     } catch (error) {
       console.error('Error creating record:', error);
     }
@@ -297,104 +297,129 @@ export const RecordsTable = () => {
         </div>
       </div>
 
-      {/* Add Record Form at the bottom */}
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            {isCreating ? 'Create New Medical Record' : 'Record Form'}
-          </h2>
-          {!isCreating && (
-            <button
-              onClick={handleCreateClick}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              + Add New Record
-            </button>
-          )}
-        </div>
-
-        {isCreating && (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="patient_id" className="block text-sm font-medium text-gray-700 mb-1">
-                  Patient ID*
-                </label>
-                <input
-                  type="number"
-                  id="patient_id"
-                  name="patient_id"
-                  value={formData.patient_id}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="doctor_id" className="block text-sm font-medium text-gray-700 mb-1">
-                  Doctor ID*
-                </label>
-                <input
-                  type="number"
-                  id="doctor_id"
-                  name="doctor_id"
-                  value={formData.doctor_id}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="prescription_id" className="block text-sm font-medium text-gray-700 mb-1">
-                  Prescription ID
-                </label>
-                <input
-                  type="number"
-                  id="prescription_id"
-                  name="prescription_id"
-                  value={formData.prescription_id}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description*
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                required
-                rows={4}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {createMutation.isPending ? 'Creating...' : 'Create Record'}
-              </button>
-            </div>
-          </form>
-        )}
+      {/* Add New Record Button */}
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={handleCreateClick}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          + Add New Record
+        </button>
       </div>
+
+      {/* Create Record Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Create New Medical Record
+                </h2>
+                <button
+                  onClick={handleCancel}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="patient_id" className="block text-sm font-medium text-gray-700 mb-1">
+                      Patient ID*
+                    </label>
+                    <input
+                      type="number"
+                      id="patient_id"
+                      name="patient_id"
+                      value={formData.patient_id}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="doctor_id" className="block text-sm font-medium text-gray-700 mb-1">
+                      Doctor ID*
+                    </label>
+                    <input
+                      type="number"
+                      id="doctor_id"
+                      name="doctor_id"
+                      value={formData.doctor_id}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="prescription_id" className="block text-sm font-medium text-gray-700 mb-1">
+                      Prescription ID
+                    </label>
+                    <input
+                      type="number"
+                      id="prescription_id"
+                      name="prescription_id"
+                      value={formData.prescription_id}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description*
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
+                    rows={4}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createMutation.isPending}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    {createMutation.isPending ? 'Creating...' : 'Create Record'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

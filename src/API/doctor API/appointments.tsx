@@ -42,6 +42,7 @@ export const deleteAppointmentFn = async (appointmentId: number): Promise<void> 
 export const createAppointmentFn = async (appointmentData: {
   doctor_id: number;
   patient_id: number;
+  name: string;
   status: string;
   reason: string;
   created_at: Date;

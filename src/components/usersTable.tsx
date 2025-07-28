@@ -24,7 +24,7 @@ export const UsersTable = () => {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
@@ -89,7 +89,7 @@ export const UsersTable = () => {
       }
 
       createMutation.mutate(userData)
-      setShowCreateForm(false)
+      setShowCreateModal(false)
       setNewUser({
         name: '',
         email: '',
@@ -309,246 +309,287 @@ export const UsersTable = () => {
         </div>
       </div>
 
-      {/* Create User Form */}
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            {showCreateForm ? 'Create New User' : 'User Creation'}
-          </h2>
-          {!showCreateForm && (
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              + Add New User
-            </button>
-          )}
-        </div>
+      {/* Add New User Button */}
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          + Add New User
+        </button>
+      </div>
 
-        {showCreateForm && (
-          <form onSubmit={handleCreateSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Common fields */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name*
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={newUser.name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email*
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={newUser.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role*
-                </label>
-                <select
-                  name="role"
-                  value={newUser.role}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Create New User
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false)
+                    setNewUser({
+                      name: '',
+                      email: '',
+                      role: 'patient',
+                      phone: '',
+                      password: '',
+                      dob: '',
+                      gender: '',
+                      address: '',
+                      specialization: '',
+                      license_number: '',
+                      availability: '',
+                      consultation_fee: '',
+                    })
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  <option value="patient">Patient</option>
-                  <option value="doctor">Doctor</option>
-                </select>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone*
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={newUser.phone}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password*
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={newUser.password}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Patient-specific fields */}
-              {newUser.role === 'patient' && (
-                <>
+              <form onSubmit={handleCreateSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Common fields */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Date of Birth*
+                      Full Name*
                     </label>
                     <input
-                      type="date"
-                      name="dob"
-                      value={newUser.dob}
+                      type="text"
+                      name="name"
+                      value={newUser.name}
                       onChange={handleInputChange}
-                      required={newUser.role === 'patient'}
+                      required
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Gender*
+                      Email*
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={newUser.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Role*
                     </label>
                     <select
-                      name="gender"
-                      value={newUser.gender}
+                      name="role"
+                      value={newUser.role}
                       onChange={handleInputChange}
-                      required={newUser.role === 'patient'}
+                      required
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      <option value="patient">Patient</option>
+                      <option value="doctor">Doctor</option>
                     </select>
                   </div>
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Address*
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={newUser.address}
-                      onChange={handleInputChange}
-                      required={newUser.role === 'patient'}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Doctor-specific fields */}
-              {newUser.role === 'doctor' && (
-                <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Specialization*
+                      Phone*
                     </label>
                     <input
-                      type="text"
-                      name="specialization"
-                      value={newUser.specialization}
+                      type="tel"
+                      name="phone"
+                      value={newUser.phone}
                       onChange={handleInputChange}
-                      required={newUser.role === 'doctor'}
+                      required
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      License Number*
+                      Password*
                     </label>
                     <input
-                      type="text"
-                      name="license_number"
-                      value={newUser.license_number}
+                      type="password"
+                      name="password"
+                      value={newUser.password}
                       onChange={handleInputChange}
-                      required={newUser.role === 'doctor'}
+                      required
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Availability*
-                    </label>
-                    <input
-                      type="text"
-                      name="availability"
-                      value={newUser.availability}
-                      onChange={handleInputChange}
-                      required={newUser.role === 'doctor'}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+                  {/* Patient-specific fields */}
+                  {newUser.role === 'patient' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Date of Birth*
+                        </label>
+                        <input
+                          type="date"
+                          name="dob"
+                          value={newUser.dob}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'patient'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Consultation Fee (KSH)*
-                    </label>
-                    <input
-                      type="number"
-                      name="consultation_fee"
-                      value={newUser.consultation_fee}
-                      onChange={handleInputChange}
-                      required={newUser.role === 'doctor'}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </>
-              )}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Gender*
+                        </label>
+                        <select
+                          name="gender"
+                          value={newUser.gender}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'patient'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Address*
+                        </label>
+                        <input
+                          type="text"
+                          name="address"
+                          value={newUser.address}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'patient'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Doctor-specific fields */}
+                  {newUser.role === 'doctor' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Specialization*
+                        </label>
+                        <input
+                          type="text"
+                          name="specialization"
+                          value={newUser.specialization}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          License Number*
+                        </label>
+                        <input
+                          type="text"
+                          name="license_number"
+                          value={newUser.license_number}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Availability*
+                        </label>
+                        <input
+                          type="text"
+                          name="availability"
+                          value={newUser.availability}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Consultation Fee (KSH)*
+                        </label>
+                        <input
+                          type="number"
+                          name="consultation_fee"
+                          value={newUser.consultation_fee}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setNewUser({
+                        name: '',
+                        email: '',
+                        role: 'patient',
+                        phone: '',
+                        password: '',
+                        dob: '',
+                        gender: '',
+                        address: '',
+                        specialization: '',
+                        license_number: '',
+                        availability: '',
+                        consultation_fee: '',
+                      })
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createMutation.isPending}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    {createMutation.isPending ? 'Creating...' : 'Create User'}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreateForm(false)
-                  setNewUser({
-                    name: '',
-                    email: '',
-                    role: 'patient',
-                    phone: '',
-                    password: '',
-                    dob: '',
-                    gender: '',
-                    address: '',
-                    specialization: '',
-                    license_number: '',
-                    availability: '',
-                    consultation_fee: '',
-                  })
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {createMutation.isPending ? 'Creating...' : 'Create User'}
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -87,6 +87,7 @@ export interface TPatient {
 export interface TAppointment {
   appointment_id: number;
   patient_id: number;
+  name: string;
   doctor_id: number;
   appointment_time: string;
   status: string;
