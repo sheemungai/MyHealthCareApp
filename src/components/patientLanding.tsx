@@ -53,7 +53,7 @@ const PatientDashboard = () => {
       {/* Welcome Header */}
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Welcome Back, Patient!
+          Welcome Back 😀!
         </h1>
         <p className="text-gray-600">
           Manage your healthcare journey in one place

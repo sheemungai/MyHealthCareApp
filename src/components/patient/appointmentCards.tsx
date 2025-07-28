@@ -62,9 +62,7 @@ const AppointmentCard = ({
       setIsVerifying(true)
       setVerificationError(null)
 
-      const result = await verifyPaymentMutation.mutateAsync(
-      appointment_id,
-      )
+      const result = await verifyPaymentMutation.mutateAsync(appointment_id)
 
       if (result.payment?.status === 'completed') {
         localStorage.removeItem('pending_payment_ref')
@@ -228,13 +226,15 @@ const AppointmentCard = ({
         )}
       </div>
       <br />
-      <a
-        href={`https://zoom.us/join?confno=${appointment.join_url}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Join Zoom Meeting
-      </a>
+      <button className="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
+        <a
+          href={appointment.join_url} // Patient gets join_url
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Join Zoom Meeting
+        </a>
+      </button>
     </div>
   )
 }
@@ -279,13 +279,13 @@ export const PatientAppointments = ({ patientId }: { patientId: number }) => {
         <h2 className="text-2xl font-bold text-gray-800">
           Patient Appointments
         </h2>
-        <button
+        {/* <button
           onClick={handleRefresh}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
           disabled={isLoading}
         >
           {isLoading ? 'Loading...' : 'Refresh'}
-        </button>
+        </button> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

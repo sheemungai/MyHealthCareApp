@@ -95,6 +95,7 @@ export interface TAppointment {
   reason: string;
   created_at: string;
   join_url?: string;
+  start_url?: string;
   authorization_url?: string;
 }
 

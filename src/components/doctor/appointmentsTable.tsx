@@ -4,7 +4,6 @@ import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
-  flexRender,
   type ColumnDef,
 } from '@tanstack/react-table'
 import {
@@ -23,7 +22,6 @@ export const DoctorsAppointmentsTable = ({
   const [showModal, setShowModal] = useState(false)
   const [formData, setFormData] = useState({
     patientId: '',
-    name: '',
     status: 'scheduled',
     reason: '',
     appointment_date: '',
@@ -80,7 +78,6 @@ export const DoctorsAppointmentsTable = ({
       setShowModal(false)
       setFormData({
         patientId: '',
-        name: '',
         status: 'scheduled',
         reason: '',
         appointment_date: '',
@@ -234,10 +231,7 @@ export const DoctorsAppointmentsTable = ({
                   <span className="font-medium">Patient ID:</span>{' '}
                   {appointment.patient_id}
                 </div>
-                {/* <div>
-                  <span className="font-medium">Patient:</span>{' '}
-                  {appointment.name}
-                </div> */}
+
                 <div>
                   <span className="font-medium">Scheduled:</span>{' '}
                   {formatDateTime(appointment.appointment_time)}
@@ -252,13 +246,14 @@ export const DoctorsAppointmentsTable = ({
                 </div>
               </div>
               <div>
+                {/* Doctor's Join Button - Uses start_url */}
                 <button className="mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
                   <a
-                    href={`https://zoom.us/join?confno=${appointment.join_url}`}
+                    href={appointment.start_url} // Doctor gets start_url
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Join Zoom Meeting
+                    Start Zoom Meeting
                   </a>
                 </button>
               </div>

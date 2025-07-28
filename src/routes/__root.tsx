@@ -1,5 +1,4 @@
 import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import Header from '../components/Header'
 import type { QueryClient } from '@tanstack/react-query'
@@ -17,7 +16,6 @@ export const Route = createRootRoute < MyRouteContext>({
       <Header />
 
       <Outlet />
-      <TanStackRouterDevtools />
       <AiAssistant />
     </>
   ),

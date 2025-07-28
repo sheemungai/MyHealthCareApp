@@ -1,16 +1,16 @@
 
 export default function HealthcareHome() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen w-full bg-white overflow-auto">
+      {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Split Layout */}
         <div className="flex flex-col md:flex-row items-center justify-between py-12 md:py-24">
           {/* Left Side - Text Content */}
           <div className="md:w-1/2 mb-12 md:mb-0 md:pr-12">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight mb-6">
-              Welcome to <span className="text-blue-600 ">HealthCare+</span>
+              Welcome to <span className="text-blue-600">HealthCare+</span>
             </h1>
-            <p className="text-xl text-gray-600  mb-8">
+            <p className="text-xl text-gray-600 mb-8">
               Your trusted partner in health and wellness. We're committed to providing compassionate care that puts you first.
             </p>
             <div className="space-y-4">
@@ -34,7 +34,12 @@ export default function HealthcareHome() {
         </div>
       </div>
 
+      {/* Debug Message - Remove this after testing */}
+      <div className="bg-red-500 text-white p-4 text-center">
+        DEBUG: Can you see this red section? If yes, scroll down to see more content.
+      </div>
+
       
     </div>
-  )
+  );
 }
