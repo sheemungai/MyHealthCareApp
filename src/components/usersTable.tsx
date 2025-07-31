@@ -1,38 +1,113 @@
 // components/UsersTable.tsx
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  
   flexRender,
   type ColumnDef,
-} from '@tanstack/react-table';
-import { useGetUserQuery, useDeleteUser } from '@/hooks/userHook';
+} from '@tanstack/react-table'
+import { useGetUserQuery, useDeleteUser, useCreateUser } from '@/hooks/userHook'
 
 interface TUser {
-  user_id: number;
-  name: string;
-  email: string;
-  role: string;
+  user_id: number
+  name: string
+  email: string
+  role: string
+  phone: string
 }
 
 export const UsersTable = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState('')
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
-  });
+  })
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    role: 'patient',
+    phone: '',
+    password: '',
+    // Patient fields
+    dob: '',
+    gender: '',
+    address: '',
+    // Doctor fields
+    specialization: '',
+    license_number: '',
+    availability: '',
+    consultation_fee: '',
+  })
 
   const { data, isLoading } = useGetUserQuery(
     pagination.pageIndex + 1,
     pagination.pageSize,
-    search
-  );
-  console.log('my users', data);
+    search,
+  )
 
-  const deleteMutation = useDeleteUser();
+  const deleteMutation = useDeleteUser()
+  const createMutation = useCreateUser()
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target
+    setNewUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      // Prepare the data based on role
+      const userData = {
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        phone: newUser.phone,
+        password: newUser.password,
+      }
+
+      if (newUser.role === 'patient') {
+        Object.assign(userData, {
+          dob: newUser.dob,
+          gender: newUser.gender,
+          address: newUser.address,
+        })
+      } else if (newUser.role === 'doctor') {
+        Object.assign(userData, {
+          specialization: newUser.specialization,
+          license_number: newUser.license_number,
+          availability: newUser.availability,
+          consultation_fee: Number(newUser.consultation_fee),
+        })
+      }
+
+      createMutation.mutate(userData)
+      setShowCreateModal(false)
+      setNewUser({
+        name: '',
+        email: '',
+        role: 'patient',
+        phone: '',
+        password: '',
+        dob: '',
+        gender: '',
+        address: '',
+        specialization: '',
+        license_number: '',
+        availability: '',
+        consultation_fee: '',
+      })
+    } catch (error) {
+      console.error('Error creating user:', error)
+    }
+  }
 
   const columns = useMemo<ColumnDef<TUser>[]>(
     () => [
@@ -49,24 +124,49 @@ export const UsersTable = () => {
         accessorKey: 'email',
       },
       {
+        header: 'Phone',
+        accessorKey: 'phone',
+      },
+      {
         header: 'Role',
         accessorKey: 'role',
+        cell: ({ row }) => (
+          <span
+            className={`px-2 py-1 rounded-full text-xs ${
+              row.original.role === 'doctor'
+                ? 'bg-blue-100 text-blue-800'
+                : row.original.role === 'patient'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {row.original.role}
+          </span>
+        ),
       },
       {
         header: 'Actions',
         cell: ({ row }) => (
           <button
-            onClick={() => deleteMutation.mutate(row.original.user_id)}
-            className="bg-red-500 text-white px-3 py-1 rounded"
-            disabled={deleteMutation.isLoading}
+            onClick={() => {
+              if (
+                confirm(
+                  `Are you sure you want to delete this user? ${row.original.user_id}`,
+                )
+              ) {
+                deleteMutation.mutate(row.original.user_id)
+              }
+            }}
+            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+            disabled={deleteMutation.isPending}
           >
-            Delete
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </button>
         ),
       },
     ],
-    [deleteMutation]
-  );
+    [deleteMutation],
+  )
 
   const table = useReactTable({
     data: data || [],
@@ -82,97 +182,414 @@ export const UsersTable = () => {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     manualPagination: true,
-  });
+  })
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>
 
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-full max-w-md"
-        />
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex space-x-2">
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
+    <div className="p-4 max-w-7xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">
+          User Management
+        </h1>
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search users by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="text-sm text-gray-600 whitespace-nowrap">
+            Showing {table.getRowModel().rows.length} of {data?.total} users
+          </div>
         </div>
-        <span className="flex items-center gap-1">
-          <div>Page</div>
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of{' '}
-            {table.getPageCount()}
-          </strong>
-        </span>
-        <select
-          value={pagination.pageSize}
-          onChange={(e) => {
-            setPagination({
-              ...pagination,
-              pageSize: Number(e.target.value),
-              pageIndex: 0,
-            });
-          }}
-          className="border rounded p-2"
-        >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
       </div>
+
+      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200 mb-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination controls */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">Rows per page:</span>
+            <select
+              value={pagination.pageSize}
+              onChange={(e) => {
+                setPagination({
+                  ...pagination,
+                  pageSize: Number(e.target.value),
+                  pageIndex: 0,
+                })
+              }}
+              className="border rounded-md p-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              {[10, 20, 30, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">
+              Page {pagination.pageIndex + 1} of {table.getPageCount()}
+            </span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                «
+              </button>
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                ‹
+              </button>
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                ›
+              </button>
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                »
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Add New User Button */}
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          + Add New User
+        </button>
+      </div>
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Create New User
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false)
+                    setNewUser({
+                      name: '',
+                      email: '',
+                      role: 'patient',
+                      phone: '',
+                      password: '',
+                      dob: '',
+                      gender: '',
+                      address: '',
+                      specialization: '',
+                      license_number: '',
+                      availability: '',
+                      consultation_fee: '',
+                    })
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Common fields */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name*
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={newUser.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email*
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={newUser.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Role*
+                    </label>
+                    <select
+                      name="role"
+                      value={newUser.role}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="patient">Patient</option>
+                      <option value="doctor">Doctor</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone*
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={newUser.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Password*
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={newUser.password}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Patient-specific fields */}
+                  {newUser.role === 'patient' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Date of Birth*
+                        </label>
+                        <input
+                          type="date"
+                          name="dob"
+                          value={newUser.dob}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'patient'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Gender*
+                        </label>
+                        <select
+                          name="gender"
+                          value={newUser.gender}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'patient'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Address*
+                        </label>
+                        <input
+                          type="text"
+                          name="address"
+                          value={newUser.address}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'patient'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Doctor-specific fields */}
+                  {newUser.role === 'doctor' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Specialization*
+                        </label>
+                        <input
+                          type="text"
+                          name="specialization"
+                          value={newUser.specialization}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          License Number*
+                        </label>
+                        <input
+                          type="text"
+                          name="license_number"
+                          value={newUser.license_number}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Availability*
+                        </label>
+                        <input
+                          type="text"
+                          name="availability"
+                          value={newUser.availability}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Consultation Fee (KSH)*
+                        </label>
+                        <input
+                          type="number"
+                          name="consultation_fee"
+                          value={newUser.consultation_fee}
+                          onChange={handleInputChange}
+                          required={newUser.role === 'doctor'}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setNewUser({
+                        name: '',
+                        email: '',
+                        role: 'patient',
+                        phone: '',
+                        password: '',
+                        dob: '',
+                        gender: '',
+                        address: '',
+                        specialization: '',
+                        license_number: '',
+                        availability: '',
+                        consultation_fee: '',
+                      })
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createMutation.isPending}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    {createMutation.isPending ? 'Creating...' : 'Create User'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
-};
+  )
+}

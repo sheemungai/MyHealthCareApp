@@ -1,71 +1,37 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
-  FaUserMd,
-  FaPhone,
   FaBars,
   FaTimes,
   FaSearch,
   FaUserCircle,
+  FaSignOutAlt,
 } from 'react-icons/fa'
 import { MdLocalHospital } from 'react-icons/md'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false) // Add login state
+  const navigate = useNavigate()
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen)
+
+  const handleSignOut = () => {
+    setIsLoggedIn(false)
+    navigate({ to: '/' }) // Redirect to home page after sign out
+  }
 
   // Navigation links array
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
-    { path: '/dashboard', label: 'Dashboard' },
     { path: '/registration', label: 'Registration' },
   ]
 
-  // const utilityLinks = [
-  //   { path: '/portal', label: 'Patient Portal' },
-  //   { path: '/contact', label: 'Contact Us' },
-  // ]
-
   return (
     <header className="bg-white shadow-md">
-      {/* Top Bar
-      <div className="bg-blue-600 text-white py-2 px-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <FaPhone className="mr-2" />
-              <span className="text-sm font-medium">
-                Emergency: (123) 456-7890
-              </span>
-            </div>
-            <div className="hidden md:flex items-center">
-              <FaUserMd className="mr-2" />
-              <Link
-                to="/doctors"
-                className="text-sm font-medium hover:underline"
-              >
-                Find a Doctor
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            {utilityLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="text-sm font-medium hover:underline"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div> */}
-
       {/* Main Header */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
@@ -100,13 +66,24 @@ const Header = () => {
               >
                 <FaSearch />
               </button>
-              <Link
-                to="/login"
-                className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-              >
-                <FaUserCircle className="mr-2" />
-                <span>Login</span>
-              </Link>
+              {isLoggedIn ? (
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+                >
+                  <FaSignOutAlt className="mr-2" />
+                  <span>Sign Out</span>
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                  onClick={() => setIsLoggedIn(true)} // Simulate login
+                >
+                  <FaUserCircle className="mr-2" />
+                  <span>Login</span>
+                </Link>
+              )}
             </div>
           </nav>
 
@@ -150,14 +127,30 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                to="/login"
-                className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition mt-2"
-                onClick={toggleMenu}
-              >
-                <FaUserCircle className="mr-2" />
-                <span>Login</span>
-              </Link>
+              {isLoggedIn ? (
+                <button
+                  onClick={() => {
+                    handleSignOut()
+                    toggleMenu()
+                  }}
+                  className="flex items-center justify-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition mt-2"
+                >
+                  <FaSignOutAlt className="mr-2" />
+                  <span>Sign Out</span>
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition mt-2"
+                  onClick={() => {
+                    setIsLoggedIn(true)
+                    toggleMenu()
+                  }}
+                >
+                  <FaUserCircle className="mr-2" />
+                  <span>Login</span>
+                </Link>
+              )}
             </nav>
           </div>
         )}

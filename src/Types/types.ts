@@ -17,12 +17,11 @@ export interface loginType {
 }
 
 export interface TUser {
-  user_id: string
+  user_id: string | number
   name: string
   email: string
   phone: string
   role: string
-  created_at: string
 }
 
 export type UserRole = 'admin' | 'pharmacist' | 'patient' | 'doctor'
@@ -61,3 +60,101 @@ export type AuthActions = {
 };
 
 export type AuthStoreType = AuthState & AuthActions;
+
+
+export interface TDoctor {
+  doctor_id: number | string;
+  name: string;
+  email: string;
+  specialization: string;
+  license_number: string;
+  availability: string;
+  consultation_fee: number;
+  appointment_id: number;
+}
+
+export interface TPatient {
+  patient_id: number;
+  name: string;
+  email: string;
+  dob: string;
+  gender: string;
+  phone: string;
+  address: string;
+
+}
+
+export interface TAppointment {
+  appointment_id: number;
+  patient_id: number;
+  name: string;
+  doctor_id: number;
+  appointment_time: string;
+  status: string;
+  payment_status: string;
+  reason: string;
+  created_at: string;
+  join_url?: string;
+  start_url?: string;
+  authorization_url?: string;
+}
+
+export interface TPrescription {
+  prescription_id: number;
+  patient_id: number;
+  doctor_id: number;
+  appointment_id: number;
+  notes: string;
+  created_at: string;
+}
+
+export interface TPharmacyOrder {
+  pharmacy_order_id: number;
+  patient_id: number;
+  doctor_id: number;
+  quantity: number;
+  status: string;
+  created_at: string;
+}
+
+export interface TMedicine {
+  medicine_id: number;
+  name: string;
+  description: string;
+  stock_quantity: number;
+  price: number;
+  expiry_date: string;
+}
+
+export interface TRecord{
+  record_id: number;
+  patient_id: number;
+  doctor_id: number;
+  prescription_id: number;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TPayment {
+  payment_id: number; 
+  appointment_id: number;
+  patient_id: number; 
+  payment_method: string;
+  pharmacy_order_id: number;
+  created_at: string;
+  authorization_url: string;
+  payment_reference: string;
+  amount: number; 
+  status: string;
+}
+  
+export interface Doctor{
+     doctor_id: string | number;
+  name: string;
+  specialization: string;
+  email: string;
+  availability: string;
+  license_number: string;
+  consultation_fee?: number;
+};

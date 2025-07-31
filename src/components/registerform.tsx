@@ -1,6 +1,11 @@
 import { useForm } from '@tanstack/react-form'
 import { useState } from 'react'
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaCheck, FaTimes, FaSpinner } from 'react-icons/fa'
+import { 
+  FaUser, FaEnvelope, FaLock, FaPhone, 
+  FaCheck, FaTimes, FaSpinner, FaCalendarAlt, 
+  FaVenusMars, FaMapMarkerAlt, FaBriefcaseMedical, 
+  FaIdCard, FaClock, FaMoneyBillWave 
+} from 'react-icons/fa'
 
 export function RegistrationPage() {
   const [registrationStatus, setRegistrationStatus] = useState<{
@@ -8,6 +13,7 @@ export function RegistrationPage() {
     message: string
   } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [role, setRole] = useState('patient') // Track role separately for immediate UI updates
 
   // Manual validation functions
   const validateName = (name: string, fieldName: string) => {
@@ -42,8 +48,18 @@ export function RegistrationPage() {
       lastName: '',
       email: '',
       phone: '',
+      role: 'patient',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      // Patient fields
+      dob: '',
+      gender: '',
+      address: '',
+      // Doctor fields
+      specialization: '',
+      licenseNumber: '',
+      availability: '',
+      consultationFee: ''
     },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true)
@@ -56,16 +72,36 @@ export function RegistrationPage() {
           throw new Error('Passwords do not match')
         }
         
+        // Prepare data based on role
+        const userData = {
+          name: `${value.firstName} ${value.lastName}`,
+          email: value.email,
+          phone: value.phone,
+          role: value.role,
+          password: value.password,
+        }
+
+        if (value.role === 'patient') {
+          Object.assign(userData, {
+            dob: value.dob,
+            gender: value.gender,
+            address: value.address
+          })
+        } else if (value.role === 'doctor') {
+          Object.assign(userData, {
+            specialization: value.specialization,
+            licenseNumber: value.licenseNumber,
+            availability: value.availability,
+            consultationFee: Number(value.consultationFee)
+          })
+        }
+
         // Mock success - replace with real registration
+        console.log('Submitting:', userData)
         setRegistrationStatus({
           success: true,
           message: 'Registration successful! Welcome to our platform!'
         })
-        
-        // Here you would typically:
-        // 1. Call your registration API
-        // 2. Handle the response
-        // 3. Redirect to login or dashboard
         
       } catch (error) {
         setRegistrationStatus({
@@ -78,6 +114,14 @@ export function RegistrationPage() {
     },
   })
 
+  // Handle role change with immediate UI update
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRole = e.target.value
+    setRole(newRole)
+    form.getField('role').handleChange(newRole)
+    setRegistrationStatus(null)
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       {/* Registration Header */}
@@ -87,7 +131,7 @@ export function RegistrationPage() {
       </div>
 
       {/* Registration Form Container */}
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
+      <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-8">
         {/* Status Message */}
         {registrationStatus && (
           <div className={`mb-6 p-4 rounded-md flex items-center ${
@@ -104,114 +148,112 @@ export function RegistrationPage() {
           </div>
         )}
 
-        
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
-            }}
-            className="space-y-4"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              {/* First Name Field */}
-              <form.Field
-                name="firstName"
-                children={(field) => {
-                  const error = validateName(field.state.value, 'First name')
-                  return (
-                    <div className="col-span-1">
-                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                        First Name
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FaUser className={`h-5 w-5 ${
-                            field.state.value 
-                              ? error 
-                                ? 'text-red-400' 
-                                : 'text-green-400'
-                              : 'text-gray-400'
-                          }`} />
-                        </div>
-                        <input
-                          id="firstName"
-                          type="text"
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => {
-                            field.handleChange(e.target.value)
-                            setRegistrationStatus(null)
-                          }}
-                          className={`block w-full pl-10 pr-3 py-2 border ${
-                            field.state.value
-                              ? error
-                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                : 'border-green-300 focus:ring-green-500 focus:border-green-500'
-                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                          } rounded-md shadow-sm focus:outline-none`}
-                          placeholder="John"
-                        />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            form.handleSubmit()
+          }}
+          className="space-y-4"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* First Name Field */}
+            <form.Field
+              name="firstName"
+              children={(field) => {
+                const error = validateName(field.state.value, 'First name')
+                return (
+                  <div className="col-span-1">
+                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                      First Name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FaUser className={`h-5 w-5 ${
+                          field.state.value 
+                            ? error 
+                              ? 'text-red-400' 
+                              : 'text-green-400'
+                            : 'text-gray-400'
+                        }`} />
                       </div>
-                      {field.state.value && error && (
-                        <p className="mt-1 text-sm text-red-600 flex items-center">
-                          <FaTimes className="mr-1" /> {error}
-                        </p>
-                      )}
+                      <input
+                        id="firstName"
+                        type="text"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => {
+                          field.handleChange(e.target.value)
+                          setRegistrationStatus(null)
+                        }}
+                        className={`block w-full pl-10 pr-3 py-2 border ${
+                          field.state.value
+                            ? error
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                            : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                        } rounded-md shadow-sm focus:outline-none`}
+                        placeholder="John"
+                      />
                     </div>
-                  )
-                }}
-              />
+                    {field.state.value && error && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center">
+                        <FaTimes className="mr-1" /> {error}
+                      </p>
+                    )}
+                  </div>
+                )
+              }}
+            />
 
-              {/* Last Name Field */}
-              <form.Field
-                name="lastName"
-                children={(field) => {
-                  const error = validateName(field.state.value, 'Last name')
-                  return (
-                    <div className="col-span-1">
-                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Name
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FaUser className={`h-5 w-5 ${
-                            field.state.value 
-                              ? error 
-                                ? 'text-red-400' 
-                                : 'text-green-400'
-                              : 'text-gray-400'
-                          }`} />
-                        </div>
-                        <input
-                          id="lastName"
-                          type="text"
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => {
-                            field.handleChange(e.target.value)
-                            setRegistrationStatus(null)
-                          }}
-                          className={`block w-full pl-10 pr-3 py-2 border ${
-                            field.state.value
-                              ? error
-                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                : 'border-green-300 focus:ring-green-500 focus:border-green-500'
-                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                          } rounded-md shadow-sm focus:outline-none`}
-                          placeholder="Doe"
-                        />
+            {/* Last Name Field */}
+            <form.Field
+              name="lastName"
+              children={(field) => {
+                const error = validateName(field.state.value, 'Last name')
+                return (
+                  <div className="col-span-1">
+                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                      Last Name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FaUser className={`h-5 w-5 ${
+                          field.state.value 
+                            ? error 
+                              ? 'text-red-400' 
+                              : 'text-green-400'
+                            : 'text-gray-400'
+                        }`} />
                       </div>
-                      {field.state.value && error && (
-                        <p className="mt-1 text-sm text-red-600 flex items-center">
-                          <FaTimes className="mr-1" /> {error}
-                        </p>
-                      )}
+                      <input
+                        id="lastName"
+                        type="text"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => {
+                          field.handleChange(e.target.value)
+                          setRegistrationStatus(null)
+                        }}
+                        className={`block w-full pl-10 pr-3 py-2 border ${
+                          field.state.value
+                            ? error
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                            : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                        } rounded-md shadow-sm focus:outline-none`}
+                        placeholder="Doe"
+                      />
                     </div>
-                  )
-                }}
-              />
-            </div>
+                    {field.state.value && error && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center">
+                        <FaTimes className="mr-1" /> {error}
+                      </p>
+                    )}
+                  </div>
+                )
+              }}
+            />
 
             {/* Email Field */}
             <form.Field
@@ -219,7 +261,7 @@ export function RegistrationPage() {
               children={(field) => {
                 const error = validateEmail(field.state.value)
                 return (
-                  <div>
+                  <div className="col-span-1">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                       Email Address
                     </label>
@@ -274,7 +316,7 @@ export function RegistrationPage() {
               children={(field) => {
                 const error = validatePhone(field.state.value)
                 return (
-                  <div>
+                  <div className="col-span-1">
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                       Phone Number
                     </label>
@@ -323,13 +365,29 @@ export function RegistrationPage() {
               }}
             />
 
+            {/* Role Field */}
+            <div className="col-span-1">
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                Role*
+              </label>
+              <select
+                id="role"
+                value={role}
+                onChange={handleRoleChange}
+                className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+              </select>
+            </div>
+
             {/* Password Field */}
             <form.Field
               name="password"
               children={(field) => {
                 const error = validatePassword(field.state.value)
                 return (
-                  <div>
+                  <div className="col-span-1">
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                       Password
                     </label>
@@ -388,7 +446,7 @@ export function RegistrationPage() {
                   field.state.value !== password ? 'Passwords do not match' : null
                 
                 return (
-                  <div>
+                  <div className="col-span-1">
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                       Confirm Password
                     </label>
@@ -437,32 +495,219 @@ export function RegistrationPage() {
               }}
             />
 
-            {/* Submit Button */}
-            <form.Subscribe
-              selector={(state) => [state.canSubmit, state.isSubmitting]}
-              children={([canSubmit]) => (
-                <button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                  className={`w-full mt-6 flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                    !canSubmit || isSubmitting
-                      ? 'bg-blue-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <FaSpinner className="animate-spin mr-2" />
-                      Registering...
-                    </>
-                  ) : (
-                    'Create Account'
+            {/* Patient-specific fields */}
+            {role === 'patient' && (
+              <>
+                {/* Date of Birth */}
+                <form.Field
+                  name="dob"
+                  children={(field) => (
+                    <div className="col-span-1">
+                      <label htmlFor="dob" className="block text-sm font-medium text-gray-700 mb-1">
+                        Date of Birth*
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaCalendarAlt className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="dob"
+                          type="date"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
                   )}
-                </button>
-              )}
-            />
-          </form>
-        
+                />
+
+                {/* Gender */}
+                <form.Field
+                  name="gender"
+                  children={(field) => (
+                    <div className="col-span-1">
+                      <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                        Gender*
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaVenusMars className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <select
+                          id="gender"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                />
+
+                {/* Address */}
+                <form.Field
+                  name="address"
+                  children={(field) => (
+                    <div className="col-span-2">
+                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                        Address*
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaMapMarkerAlt className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="address"
+                          type="text"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="123 Main St, Nairobi"
+                        />
+                      </div>
+                    </div>
+                  )}
+                />
+              </>
+            )}
+
+            {/* Doctor-specific fields */}
+            {role === 'doctor' && (
+              <>
+                {/* Specialization */}
+                <form.Field
+                  name="specialization"
+                  children={(field) => (
+                    <div className="col-span-1">
+                      <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-1">
+                        Specialization*
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaBriefcaseMedical className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="specialization"
+                          type="text"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Cardiology"
+                        />
+                      </div>
+                    </div>
+                  )}
+                />
+
+                {/* License Number */}
+                <form.Field
+                  name="licenseNumber"
+                  children={(field) => (
+                    <div className="col-span-1">
+                      <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                        License Number*
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaIdCard className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="licenseNumber"
+                          type="text"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="MD-123456"
+                        />
+                      </div>
+                    </div>
+                  )}
+                />
+
+                {/* Availability */}
+                <form.Field
+                  name="availability"
+                  children={(field) => (
+                    <div className="col-span-1">
+                      <label htmlFor="availability" className="block text-sm font-medium text-gray-700 mb-1">
+                        Availability*
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaClock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="availability"
+                          type="text"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Mon-Fri, 9am-5pm"
+                        />
+                      </div>
+                    </div>
+                  )}
+                />
+
+                {/* Consultation Fee */}
+                <form.Field
+                  name="consultationFee"
+                  children={(field) => (
+                    <div className="col-span-1">
+                      <label htmlFor="consultationFee" className="block text-sm font-medium text-gray-700 mb-1">
+                        Consultation Fee (KSH)*
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaMoneyBillWave className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="consultationFee"
+                          type="number"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="2000"
+                        />
+                      </div>
+                    </div>
+                  )}
+                />
+              </>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit]) => (
+              <button
+                type="submit"
+                disabled={!canSubmit || isSubmitting}
+                className={`w-full mt-6 flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  !canSubmit || isSubmitting
+                    ? 'bg-blue-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" />
+                    Registering...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            )}
+          />
+        </form>
 
         <div className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{' '}

@@ -1,9 +1,9 @@
 
 export default function HealthcareHome() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen w-full bg-white overflow-auto">
+      {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Split Layout */}
         <div className="flex flex-col md:flex-row items-center justify-between py-12 md:py-24">
           {/* Left Side - Text Content */}
           <div className="md:w-1/2 mb-12 md:mb-0 md:pr-12">
@@ -26,13 +26,20 @@ export default function HealthcareHome() {
           {/* Right Side - Image */}
           <div className="md:w-1/2">
             <img 
-              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+              src="https://i.pinimg.com/736x/1e/c3/63/1ec363db9598a75130f66966aacbc810.jpg"
               alt="Doctor and patient having a consultation"
               className="rounded-lg shadow-xl w-full h-auto object-cover"
             />
           </div>
         </div>
       </div>
+
+      {/* Debug Message - Remove this after testing */}
+      <div className="bg-red-500 text-white p-4 text-center">
+        DEBUG: Can you see this red section? If yes, scroll down to see more content.
+      </div>
+
+      
     </div>
-  )
+  );
 }
