@@ -64,7 +64,7 @@ const columns: ColumnDef<Patient>[] = [
   const { data, isLoading, isError } = useGetPatientsQuery()
 
   const table = useReactTable({
-    data: data || [],
+    data: Array.isArray(data) ? data : [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   })

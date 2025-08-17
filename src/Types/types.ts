@@ -24,6 +24,16 @@ export interface TUser {
   role: string
 }
 
+export interface TProfile{
+  name: string;
+  email: string;
+  dob: string;
+  gender: string;
+  phone: string;
+  address: string;
+
+}
+
 export type UserRole = 'admin' | 'pharmacist' | 'patient' | 'doctor'
 
 export type AuthState = {
@@ -63,8 +73,8 @@ export type AuthStoreType = AuthState & AuthActions;
 
 
 export interface TDoctor {
-  doctor_id: number | string;
-  name: string;
+  doctor_id: number ;
+  doctor_name: string;
   email: string;
   specialization: string;
   license_number: string;
@@ -85,7 +95,7 @@ export interface TPatient {
 }
 
 export interface TAppointment {
-  appointment_id: number;
+  appointment_id: number ;
   patient_id: number;
   name: string;
   doctor_id: number;
@@ -103,7 +113,7 @@ export interface TPrescription {
   prescription_id: number;
   patient_id: number;
   doctor_id: number;
-  appointment_id: number;
+  appointment_id: number | null; // Made nullable
   notes: string;
   created_at: string;
 }

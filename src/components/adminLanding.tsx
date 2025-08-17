@@ -5,12 +5,17 @@ import {
   FiDollarSign,
   FiActivity,
   FiShoppingCart,
-  FiPieChart as FiPieChartAlt,
+
 } from 'react-icons/fi'
 import { FaUserMd, FaPills } from 'react-icons/fa'
 import { Link } from '@tanstack/react-router'
+import { useGetPatientQuery } from '@/hooks/patientsHook'
+
+
 
 const AdminDashboard = () => {
+const {data} = useGetPatientQuery() 
+
   // Route cards configuration
   const routeCards = [
     {
@@ -110,11 +115,11 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-blue-50 p-4 rounded-lg text-center">
             <p className="text-sm text-blue-600 mb-1">Total Patients</p>
-            <p className="text-2xl font-bold">24</p>
+            {/* <p className="text-2xl font-bold">{data?.data?.TPatients || 0}</p> */}
           </div>
           <div className="bg-green-50 p-4 rounded-lg text-center">
             <p className="text-sm text-green-600 mb-1">Today's Appointments</p>
-            <p className="text-2xl font-bold">5</p>
+            {/* <p className="text-2xl font-bold">{data?.todaysAppointments || 0}</p> */}
           </div>
           <div className="bg-purple-50 p-4 rounded-lg text-center">
             <p className="text-sm text-purple-600 mb-1">

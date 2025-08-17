@@ -18,7 +18,7 @@ export const DoctorsTable = () => {
     pageSize: 10,
   });
 
-  const { data, isLoading } = useGetDoctorQuery(
+  const { data, isLoading, isError } = useGetDoctorQuery(
     pagination.pageIndex + 1,
     pagination.pageSize,
     search
@@ -27,12 +27,12 @@ export const DoctorsTable = () => {
   const deleteMutation = useDeleteDoctor();
 
   // Format currency to Kenyan Shillings
-  const formatToKES = (amount: number) => {
+  const formatToKES = (amount: string) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
       currency: 'KES',
       minimumFractionDigits: 2
-    }).format(amount);
+    }).format(parseFloat(amount));
   };
 
   const columns = useMemo<ColumnDef<TDoctor>[]>(
@@ -40,10 +40,21 @@ export const DoctorsTable = () => {
       {
         header: 'ID',
         accessorKey: 'doctor_id',
+        size: 80,
       },
       {
         header: 'Name',
-        accessorKey: 'name',
+        accessorKey: 'doctor_name',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            {/* <img 
+              // src={row.original.img} 
+              alt={row.original.doctor_name}
+              className="w-10 h-10 rounded-full object-cover"
+            /> */}
+            <span className="font-medium">{row.original.doctor_name}</span>
+          </div>
+        ),
       },
       {
         header: 'Email',
@@ -52,41 +63,53 @@ export const DoctorsTable = () => {
       {
         header: 'Specialization',
         accessorKey: 'specialization',
+        cell: ({ row }) => (
+          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+            {row.original.specialization}
+          </span>
+        ),
       },
       {
-        header: 'License Number',
+        header: 'License',
         accessorKey: 'license_number',
-      },
-      {
-        header: 'Consultation Fee',
-        cell: ({ row }) => formatToKES(row.original.consultation_fee),
       },
       {
         header: 'Availability',
         accessorKey: 'availability',
+        cell: ({ row }) => (
+          <div className="max-w-xs">
+            {row.original.availability}
+          </div>
+        ),
+      },
+      {
+        header: 'Consultation Fee',
+        accessorKey: 'consultation_fee',
+        cell: ({ row }) => formatToKES(Number(row.original.consultation_fee).toString()),
       },
       {
         header: 'Actions',
         cell: ({ row }) => (
           <button
             onClick={() => {
-              if (confirm(`Are you sure you want to delete ${row.original.name}?`)) {
+              if (confirm(`Delete Dr. ${row.original.doctor_name}?`)) {
                 deleteMutation.mutate(row.original.doctor_id);
               }
             }}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+            className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors disabled:opacity-50"
             disabled={deleteMutation.isPending}
           >
             {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </button>
         ),
+        size: 100,
       },
     ],
     [deleteMutation]
   );
 
   const table = useReactTable({
-    data:data || [],
+    data: Array.isArray(data) ? data : data?.data || [],
     columns,
     pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
     state: {
@@ -101,27 +124,43 @@ export const DoctorsTable = () => {
     manualPagination: true,
   });
 
-  if (isLoading) return <div className="text-center py-8">Loading doctors...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-red-50 text-red-700 p-4 rounded-md">
+        Error loading doctors. Please try again.
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Doctors Management</h1>
-        <div className="flex justify-between items-center">
-          <input
-            type="text"
-            placeholder="Search doctors by name, email, or specialization..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border p-2 rounded w-full max-w-md"
-          />
-          <span className="text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Doctors Management</h1>
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search doctors by name, specialization or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="text-sm text-gray-600 whitespace-nowrap">
             Showing {table.getRowModel().rows.length} of {data?.total} doctors
-          </span>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -131,6 +170,7 @@ export const DoctorsTable = () => {
                     <th
                       key={header.id}
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      style={{ width: header.getSize() }}
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -145,7 +185,10 @@ export const DoctorsTable = () => {
               {table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-50">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap">
+                    <td 
+                      key={cell.id} 
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -155,87 +198,62 @@ export const DoctorsTable = () => {
           </table>
         </div>
 
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+        {/* Pagination controls */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">Rows per page:</span>
+            <select
+              value={pagination.pageSize}
+              onChange={(e) => {
+                setPagination({
+                  ...pagination,
+                  pageSize: Number(e.target.value),
+                  pageIndex: 0,
+                });
+              }}
+              className="border rounded-md p-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              Previous
-            </button>
-            <button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-            >
-              Next
-            </button>
+              {[10, 20, 30, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{pagination.pageIndex * pagination.pageSize + 1}</span> to{' '}
-                <span className="font-medium">
-                  {Math.min(
-                    (pagination.pageIndex + 1) * pagination.pageSize,
-                    data?.total || 0
-                  )}
-                </span>{' '}
-                of <span className="font-medium">{data?.total || 0}</span> doctors
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-700">Rows per page:</span>
-                <select
-                  value={pagination.pageSize}
-                  onChange={(e) => {
-                    setPagination({
-                      ...pagination,
-                      pageSize: Number(e.target.value),
-                      pageIndex: 0,
-                    });
-                  }}
-                  className="border rounded p-1 text-sm"
-                >
-                  {[10, 20, 30, 50].map((pageSize) => (
-                    <option key={pageSize} value={pageSize}>
-                      {pageSize}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <nav className="flex space-x-2">
-                <button
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
-                  className="px-3 py-1 border rounded text-sm disabled:opacity-50"
-                >
-                  «
-                </button>
-                <button
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                  className="px-3 py-1 border rounded text-sm disabled:opacity-50"
-                >
-                  ‹
-                </button>
-                <button
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                  className="px-3 py-1 border rounded text-sm disabled:opacity-50"
-                >
-                  ›
-                </button>
-                <button
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  disabled={!table.getCanNextPage()}
-                  className="px-3 py-1 border rounded text-sm disabled:opacity-50"
-                >
-                  »
-                </button>
-              </nav>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-700">
+              Page {pagination.pageIndex + 1} of {table.getPageCount()}
+            </span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                «
+              </button>
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                ‹
+              </button>
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                ›
+              </button>
+              <button
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+                className="px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-100"
+              >
+                »
+              </button>
             </div>
           </div>
         </div>

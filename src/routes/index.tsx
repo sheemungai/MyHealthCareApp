@@ -136,14 +136,7 @@ function App() {
                     Services
                   </a>
                 </li>
-                <li>
-                  <Link
-                    to="/dashboard/patient/doctors"
-                    className="text-gray-400 hover:text-white transition"
-                  >
-                    Doctors
-                  </Link>
-                </li>
+               
                 <li>
                   <a
                     href="#"

@@ -1,10 +1,10 @@
 import { createPatientFn, deletePatientFn, getPatientsFn } from "@/API/patients";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useGetPatientQuery = (page: number, limit: number, search: string) => {
+export const useGetPatientQuery = () => {
   return useQuery({
-    queryKey: ['patients', page, limit, search],
-    queryFn: () => getPatientsFn(page, limit, search),
+    queryKey: ['patients'],
+    queryFn: () => getPatientsFn(),
   });
 }
 

@@ -150,16 +150,7 @@ export default function AboutUs() {
                     Services
                   </a>
                 </li>
-                <Link to="/dashboard/patient/doctors">
-                  <li>
-                    <a
-                      href="#"
-                      className="text-gray-400 hover:text-white transition"
-                    >
-                      Doctors
-                    </a>
-                  </li>
-                </Link>
+               
               
                 <li>
                   <a

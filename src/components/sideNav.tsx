@@ -83,6 +83,11 @@ export default function SideNav({ role }: SideNavProps) {
     ],
     doctor: [
 
+       {
+        icon: <MdDashboard size={20} />,
+        label: 'Dashboard',
+        to: '/dashboard/doctor/dashboard',
+      },
       
       {
         icon: <FaCalendarAlt size={18} />,
@@ -106,6 +111,11 @@ export default function SideNav({ role }: SideNavProps) {
       },
     ],
     patient: [
+      {
+        icon: <MdDashboard size={20} />,
+        label: 'Dashboard',
+        to: '/dashboard/patient/dashboard',
+      },
       {
         icon: <FaUserMd size={18} />,
         label: 'Doctors',

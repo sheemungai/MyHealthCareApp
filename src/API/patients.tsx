@@ -75,3 +75,21 @@ export const getPatientsCount = async (): Promise<{ total: number }> => {
   });
   return response.json();
 };
+
+export const updatePatientFn = async (patientData: TPatient) => {
+  const fullUrl = `${url}/patients`;
+  const response = await fetch(fullUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getAccessTokenHelper()}`,
+    },
+    body: JSON.stringify(patientData),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update patient');
+  }
+
+  return response.json();
+}

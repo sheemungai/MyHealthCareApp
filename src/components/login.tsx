@@ -2,7 +2,7 @@ import { useLoginHook } from '@/hooks/authHook'
 import { loginUserHelper } from '@/lib/authHelper'
 import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FaEnvelope, FaLock, FaCheck, FaTimes, FaSpinner } from 'react-icons/fa'
 
 export function LoginPage() {
@@ -12,11 +12,11 @@ export function LoginPage() {
   } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // AUTH LOGIN HOOK
-  const { mutate, data } = useLoginHook()
+  // AUTH LOGIN HOOK - using mutateAsync for proper async handling
+  const { mutateAsync } = useLoginHook()
   const navigate = useNavigate()
 
-  // Manual validation functions
+  // Validation functions (moved outside form for better readability)
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!email) return 'Email is required'
@@ -29,14 +29,6 @@ export function LoginPage() {
     if (password.length < 6) return 'Password must be at least 6 characters'
     return null
   }
-  useEffect(() => {
-    if (data) {
-      loginUserHelper(data.token, data.user)
-      navigate({ to: '/dashboard', replace: true })
-    }
-
-    console.log('data in useEffect', data)
-  }, [data])
 
   const form = useForm({
     defaultValues: {
@@ -45,15 +37,20 @@ export function LoginPage() {
     },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true)
-      try {
-        // API call
-        mutate(value)
-        console.log('myresponse', data)
+      setLoginStatus(null) // Clear previous status
 
+      try {
+        // Await the mutation and handle result directly
+        const result = await mutateAsync(value)
+        
+        loginUserHelper(result.token, result.user)
         setLoginStatus({
           success: true,
           message: 'Login successful! Redirecting...',
         })
+        
+        // Navigate directly after successful login
+        navigate({ to: '/dashboard', replace: true })
       } catch (error) {
         console.error('Login failed:', error)
         setLoginStatus({
@@ -137,10 +134,8 @@ export function LoginPage() {
                       onBlur={field.handleBlur}
                       onChange={(e) => {
                         field.handleChange(e.target.value)
-                        // Clear status when user starts typing again
                         setLoginStatus(null)
                       }}
-                      onKeyDown={() => setLoginStatus(null)}
                       className={`block w-full pl-10 pr-3 py-2 border ${
                         field.state.value
                           ? error
@@ -201,7 +196,6 @@ export function LoginPage() {
                         field.handleChange(e.target.value)
                         setLoginStatus(null)
                       }}
-                      onKeyDown={() => setLoginStatus(null)}
                       className={`block w-full pl-10 pr-3 py-2 border ${
                         field.state.value
                           ? error

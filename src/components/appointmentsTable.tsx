@@ -20,9 +20,7 @@ export const AppointmentsTable = () => {
   });
 
   const { data, isLoading, isError } = useGetAppointmentQuery(
-    pagination.pageIndex + 1,
-    pagination.pageSize,
-    search
+  
   );
   console.log(" my Appointments data:", data);
 
@@ -110,7 +108,7 @@ export const AppointmentsTable = () => {
   );
 
   const table = useReactTable({
-    data: data || [],
+    data: Array.isArray(data) ? data : data?.data || [],
     columns,
     pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
     state: {

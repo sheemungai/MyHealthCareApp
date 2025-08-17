@@ -46,3 +46,22 @@ export const deleteDoctorFn = async (doctorId: number): Promise<void> => {
     throw new Error('Failed to delete user');
   }
 }
+
+export const getAppointmentSlotsFn = async (doctorId: number): Promise<string[]> => {
+  const fullUrl = `${url}/doctors/${doctorId}/appointmentslots`;
+  const token = getAccessTokenHelper();
+
+  const response = await fetch(fullUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch appointment slots');
+  }
+
+  return response.json();
+}

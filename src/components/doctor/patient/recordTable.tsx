@@ -70,7 +70,7 @@ export const MedicalRecordsTable = () => {
   );
 
   const table = useReactTable({
-    data: data || [],
+    data: Array.isArray(data) ? data : [],
     columns,
     state: {
       globalFilter: search,
@@ -150,7 +150,7 @@ export const MedicalRecordsTable = () => {
         </div>
       </div>
 
-      {records.length === 0 && !isLoading && (
+      {Array.isArray(records) && records.length === 0 && !isLoading && (
         <div className="text-center py-8 text-gray-500">
           No medical records found.
         </div>

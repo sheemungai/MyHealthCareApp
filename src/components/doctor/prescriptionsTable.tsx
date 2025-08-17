@@ -58,8 +58,11 @@ const PrescriptionTable = () => {
         doctor_id: parseInt(formData.doctor_id),
         appointment_id: formData.appointment_id
           ? parseInt(formData.appointment_id)
-          : undefined,
+          : null,
         notes: formData.notes,
+        // Add dummy values for required fields if mutation expects TPrescription
+        prescription_id: 0,
+        created_at: new Date().toISOString(),
       })
       // Reset form and hide it after successful submission
       setFormData({
@@ -133,7 +136,7 @@ const PrescriptionTable = () => {
 
   // Table instance
   const table = useReactTable({
-    data: data || [],
+    data: Array.isArray(data) ? data : [],
     columns,
     pageCount: data?.total ? Math.ceil(data.total / pageSize) : -1,
     state: {
@@ -274,8 +277,19 @@ const PrescriptionTable = () => {
                   onClick={() => setShowModal(false)}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -283,7 +297,9 @@ const PrescriptionTable = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Patient ID*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Patient ID*
+                    </label>
                     <input
                       type="number"
                       name="patient_id"
@@ -295,7 +311,9 @@ const PrescriptionTable = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Doctor ID*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Doctor ID*
+                    </label>
                     <input
                       type="number"
                       name="doctor_id"
@@ -307,7 +325,9 @@ const PrescriptionTable = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Appointment ID</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Appointment ID
+                    </label>
                     <input
                       type="number"
                       name="appointment_id"
@@ -319,7 +339,9 @@ const PrescriptionTable = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Notes*</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes*
+                  </label>
                   <textarea
                     name="notes"
                     value={formData.notes}
@@ -343,7 +365,9 @@ const PrescriptionTable = () => {
                     disabled={createPrescription.isPending}
                     className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
                   >
-                    {createPrescription.isPending ? 'Saving...' : 'Save Prescription'}
+                    {createPrescription.isPending
+                      ? 'Saving...'
+                      : 'Save Prescription'}
                   </button>
                 </div>
               </form>

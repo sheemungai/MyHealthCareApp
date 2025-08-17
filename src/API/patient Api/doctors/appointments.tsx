@@ -3,7 +3,7 @@ import {   getAccessTokenHelper } from "@/lib/authHelper";
 
 
 export const createAppointmentFn = async (appointmentData: {
-  doctor_id: number;                                        
+  doctor_name: string;                                        
     patient_id: number;
     status: string;
     reason: string;

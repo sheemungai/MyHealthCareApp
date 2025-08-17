@@ -3,7 +3,7 @@ import url from '@/constants/urls'
 import { getAccessTokenHelper } from '@/lib/authHelper'
 import type { TAppointment } from '@/Types/types'
 
-export const getAppointmentsFn = async (patientId: number): Promise<{
+export const getAppointmentsFn = async (): Promise<{
   data: TAppointment[];
   total: number;
 }> => {
