@@ -9,12 +9,12 @@ import {
 } from 'react-icons/fi'
 import { FaUserMd, FaPills } from 'react-icons/fa'
 import { Link } from '@tanstack/react-router'
-import { useGetPatientQuery } from '@/hooks/patientsHook'
+// import { useGetPatientQuery } from '@/hooks/patientsHook'
 
 
 
 const AdminDashboard = () => {
-const {data} = useGetPatientQuery() 
+// const {data} = useGetPatientQuery() 
 
   // Route cards configuration
   const routeCards = [

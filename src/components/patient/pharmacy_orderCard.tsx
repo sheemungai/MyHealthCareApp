@@ -1,54 +1,53 @@
-import { useGetPharmacyOrders } from '@/hooks/patients/pharmacy_ordersHook'
-import { motion } from 'framer-motion'
+import { useGetPharmacyOrders } from '@/hooks/patients/pharmacy_ordersHook';
+import { motion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
+import { useMemo } from 'react';
+
+type Medicine = {
+  name: string;
+  price: number;
+  img?: string;
+};
 
 type PharmacyOrder = {
-  pharmacy_order_id: number
-  patient_id: number
-  medication_name: string
-  dosage: string
-  quantity: number
-  status: string
-  created_at: string
-  // Optional medicine details if available
-  medicine?: {
-    name: string
-    price: number
-    img?: string
-  }
+  pharmacy_order_id: number;
+  patient_id: number;
+  medication_name: string;
+  dosage: string;
+  quantity: number;
+  status: 'pending' | 'completed' | 'cancelled' | 'processing';
+  created_at: string;
+  medicine?: Medicine;
+};
+
+const statusConfig = {
+  pending: {
+    bg: 'bg-yellow-100',
+    text: 'text-yellow-800',
+  },
+  completed: {
+    bg: 'bg-green-100',
+    text: 'text-green-800',
+  },
+  cancelled: {
+    bg: 'bg-red-100',
+    text: 'text-red-800',
+  },
+  processing: {
+    bg: 'bg-blue-100',
+    text: 'text-blue-800',
+  },
+} as const;
+
+interface PharmacyOrdersListProps {
+  patientId: number;
 }
 
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  completed: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
-  processing: 'bg-blue-100 text-blue-800',
-}
+export const PharmacyOrdersList = ({ patientId }: PharmacyOrdersListProps) => {
+  const { data, isLoading, isError, error } = useGetPharmacyOrders(patientId);
 
-export const PharmacyOrdersList = ({ patientId }: { patientId: number }) => {
-  const {
-    data: orders,
-    isLoading,
-    isError,
-    error,
-  } = useGetPharmacyOrders(patientId)
-
-  console.log('Pharmacy Orders:', orders)
-
-  if (isLoading) {
-    return <div className="text-center py-8">Loading pharmacy orders...</div>;
-  }
-
-  if (isError) {
-    return (
-      <div className="text-center py-8 text-red-500">
-        Error: {error.message}
-      </div>
-    );
-  }
-
-  const arrayOrders = Array.isArray(orders) ? orders : [];
-  // Animation variants for the container
-  const container = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -56,36 +55,59 @@ export const PharmacyOrdersList = ({ patientId }: { patientId: number }) => {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
-  // Format date to be more readable
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    })
+    });
+  };
+
+  const orders = useMemo(() => {
+    if (!data) return [];
+    return Array.isArray(data) ? data : [data];
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <p className="mt-4 text-gray-600">Loading your pharmacy orders...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-6 text-center">
+        <h3 className="text-lg font-medium text-red-800">
+          Failed to load orders
+        </h3>
+        <p className="mt-2 text-red-600">{error?.message || 'Unknown error'}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Your Pharmacy Orders</h1>
+    <div className="p-4 md:p-6">
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">Your Pharmacy Orders</h1>
 
-      {orders?.length === 0 ? (
-        <div className="text-center py-12">
+      {orders.length === 0 ? (
+        <div className="rounded-lg border-2 border-dashed border-gray-200 p-12 text-center">
           <p className="text-gray-500">You haven't placed any orders yet.</p>
         </div>
       ) : (
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          variants={container}
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          variants={containerVariants}
           initial="hidden"
           animate="show"
         >
-          {arrayOrders.map((order: PharmacyOrder) => (
+          {orders.map((order) => (
             <OrderCard
               key={order.pharmacy_order_id}
               order={order}
@@ -95,18 +117,16 @@ export const PharmacyOrdersList = ({ patientId }: { patientId: number }) => {
         </motion.div>
       )}
     </div>
-  )
+  );
+};
+
+interface OrderCardProps {
+  order: PharmacyOrder;
+  formatDate: (date: string) => string;
 }
 
-const OrderCard = ({
-  order,
-  formatDate,
-}: {
-  order: PharmacyOrder
-  formatDate: (date: string) => string
-}) => {
-  // Animation variants for each card
-  const cardVariants = {
+const OrderCard = ({ order, formatDate }: OrderCardProps) => {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: {
       opacity: 1,
@@ -118,48 +138,50 @@ const OrderCard = ({
     },
     hover: {
       y: -5,
-      boxShadow:
-        '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
       transition: { duration: 0.2 },
     },
-  }
+  };
 
-  // Get status color class
-  const statusColor =
-    statusColors[order.status.toLowerCase()] || 'bg-gray-100 text-gray-800'
+  const status = statusConfig[order.status];
 
   return (
     <motion.div
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100"
+      className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
       variants={cardVariants}
       whileHover="hover"
-      initial="hidden"
-      animate="show"
     >
-      <div className="p-6">
-        {/* Order ID and Status */}
-        <div className="flex justify-between items-start mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Order #{order.pharmacy_order_id}
-          </h2>
+      <div className="p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {order.medication_name}
+            </h2>
+            <p className="text-sm text-gray-500">
+              Order #{order.pharmacy_order_id}
+            </p>
+          </div>
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${status.bg} ${status.text}`}
           >
             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
           </span>
         </div>
 
-        {/* Medicine Info */}
-        <div className="mb-4">
-          <p className="font-medium text-gray-800">{order.medication_name}</p>
-          <p className="text-gray-600 text-sm">Dosage: {order.dosage}</p>
-          <p className="text-gray-600 text-sm">Quantity: {order.quantity}</p>
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="font-medium">Dosage:</span>
+            <span className="ml-2">{order.dosage}</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <span className="font-medium">Quantity:</span>
+            <span className="ml-2">{order.quantity}</span>
+          </div>
         </div>
 
-        {/* Order Date */}
-        <div className="flex items-center text-sm text-gray-600 mb-4">
+        <div className="mt-4 flex items-center text-sm text-gray-500">
           <svg
-            className="w-4 h-4 mr-2 text-gray-400"
+            className="mr-2 h-4 w-4 flex-shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -167,7 +189,7 @@ const OrderCard = ({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth="2"
+              strokeWidth={2}
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
@@ -175,7 +197,7 @@ const OrderCard = ({
         </div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default PharmacyOrdersList
+export default PharmacyOrdersList;
