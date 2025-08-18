@@ -35,10 +35,11 @@ const OrderMedicineModal = ({
     try {
       const orderData = {
         patient_id: patientId,
-        medicine_id: medicine.medicine_id,
+        medication_name: medicine.name,
+        dosage: 'N/A', // Provide a default or actual dosage value
         quantity,
         status: 'pending',
-        created_at: new Date().toISOString()
+        created_at: new Date()
       };
 
       const result = await createOrderMutation.mutateAsync(orderData);

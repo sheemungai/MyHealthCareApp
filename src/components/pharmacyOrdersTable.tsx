@@ -102,7 +102,7 @@ export const PharmacyOrdersTable = () => {
   );
 
   const table = useReactTable({
-    data: data || [],
+    data: Array.isArray(data) ? data : [],
     columns,
     pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
     state: {

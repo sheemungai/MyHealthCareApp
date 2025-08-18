@@ -12,7 +12,7 @@ export const PaymentVerification = () => {
     const reference = queryParams.get('reference')
     
     if (reference) {
-      verifyPayment(reference)
+      verifyPayment(Number(reference))
     }
   }, [location, verifyPayment])
 

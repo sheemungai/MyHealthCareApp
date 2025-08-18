@@ -20,9 +20,7 @@ export const PatientsTable = () => {
   });
 
   const { data, isLoading, isError } = useGetPatientQuery(
-    pagination.pageIndex + 1,
-    pagination.pageSize,
-    search
+   
   );
 
   const deleteMutation = useDeletePatient();
@@ -101,7 +99,7 @@ export const PatientsTable = () => {
   );
 
   const table = useReactTable({
-    data: data || [],
+    data: Array.isArray(data) ? data : [],
     columns,
     pageCount: Math.ceil((data?.total || 0) / pagination.pageSize),
     state: {

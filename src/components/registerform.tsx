@@ -118,7 +118,7 @@ export function RegistrationPage() {
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newRole = e.target.value
     setRole(newRole)
-    form.getField('role').handleChange(newRole)
+    form.setFieldValue('role', newRole)
     setRegistrationStatus(null)
   }
 
