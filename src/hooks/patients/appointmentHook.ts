@@ -9,6 +9,7 @@ export const useCreateAppointment = () => {
     mutationFn: (appointmentData: {
       doctor_id: number
       patient_id: number
+      name: string
       status: string
       reason: string
       appointment_time: Date

@@ -2,7 +2,6 @@ import {
   FiCalendar,
   FiShoppingCart,
   FiFileText,
-  FiCreditCard,
 } from 'react-icons/fi'
 import { FaUserMd } from 'react-icons/fa'
 import { Link } from '@tanstack/react-router'
