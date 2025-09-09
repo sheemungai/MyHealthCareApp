@@ -11,6 +11,7 @@ export interface Dashboard {
 }
 
 export interface DashboardCard {
+  stats: boolean;
   id: number;
   title: string;
   subtitle?: string;
