@@ -16,13 +16,17 @@ export interface loginType {
   password: string
 }
 
+// Base User Type
 export interface TUser {
-  user_id: string | number
-  name: string
-  email: string
-  phone: string
-  role: string
+  user_id:number;
+  name: string;
+  email: string;
+  phone: string;
+  role: string | 'patient' | 'doctor' | 'admin';
+  img?: string;
+  created_at: string;
 }
+
 
 export interface TProfile{
   name: string;
@@ -169,3 +173,70 @@ export interface Doctor{
   consultation_fee?: number;
 };
 
+
+
+// Patient specific type
+export interface PatientUser extends TUser {
+  role: 'patient';
+  dob?: string;
+  gender?: string;
+  address?: string;
+}
+
+// Doctor specific type
+export interface DoctorUser extends TUser {
+  role: 'doctor';
+  specialization: string;
+  license_number: string;
+  consultation_fee: number;
+}
+
+// Admin specific type
+export interface AdminUser extends TUser {
+  role: 'admin';
+}
+
+// Union type for all user profiles
+export type UserProfile = PatientUser | DoctorUser | AdminUser;
+
+// Update profile data type (all fields optional)
+export interface UpdateProfileData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  // Patient fields
+  dob?: string;
+  gender?: string;
+  address?: string;
+  // Doctor fields
+  specialization?: string;
+  license_number?: string;
+  consultation_fee?: number;
+  img?: string;
+}
+
+// For creating a new user
+export interface CreateUserData {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  role: 'patient' | 'doctor' | 'admin';
+  // Optional patient fields
+  dob?: string;
+  gender?: string;
+  address?: string;
+  // Optional doctor fields
+  specialization?: string;
+  license_number?: string;
+  consultation_fee?: number;
+}
+
+// API Response wrapper (if your backend uses this format)
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  count?: number;
+}

@@ -10,6 +10,8 @@ import {
   FaPrescriptionBottleAlt,
   FaUserInjured,
   FaMoneyBill,
+  FaUserCircle,
+  FaSignOutAlt,
 } from 'react-icons/fa'
 import { MdDashboard, MdLocalPharmacy } from 'react-icons/md'
 
@@ -192,6 +194,34 @@ export default function SideNav({ role }: SideNavProps) {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* Profile Section at the bottom */}
+      <div className="border-t border-gray-200 pt-4 pb-6 px-2">
+        <div className="space-y-1">
+          {/* Profile Link */}
+          <Link
+            to="/profile"
+            className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-blue-50 group"
+            activeProps={{ className: 'bg-blue-100 text-blue-600' }}
+          >
+            <span className="text-gray-500 group-hover:text-blue-600 mr-3">
+              <FaUserCircle size={20} />
+            </span>
+            <span>My Profile</span>
+          </Link>
+
+          {/* Logout Button */}
+          {/* <button
+            onClick={handleLogout}
+            className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-red-50 text-gray-700 hover:text-red-600 group"
+          >
+            <span className="text-gray-500 group-hover:text-red-600 mr-3">
+              <FaSignOutAlt size={18} />
+            </span>
+            <span>Logout</span>
+          </button> */}
+        </div>
       </div>
     </nav>
   )

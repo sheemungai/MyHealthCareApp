@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegistrationRouteImport } from './routes/registration'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -50,6 +51,11 @@ import { Route as DashboardPatientDoctorsAppointmentsFormDoctor_idRouteImport } 
 const RegistrationRoute = RegistrationRouteImport.update({
   id: '/registration',
   path: '/registration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -260,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/registration': typeof RegistrationRoute
   '/payment/verify': typeof PaymentVerifyRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/contacts': typeof ContactsRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/registration': typeof RegistrationRoute
   '/payment/verify': typeof PaymentVerifyRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/registration': typeof RegistrationRoute
   '/payment/verify': typeof PaymentVerifyRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/home'
     | '/login'
+    | '/profile'
     | '/registration'
     | '/payment/verify'
     | '/dashboard/'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/home'
     | '/login'
+    | '/profile'
     | '/registration'
     | '/payment/verify'
     | '/dashboard'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/home'
     | '/login'
+    | '/profile'
     | '/registration'
     | '/payment/verify'
     | '/dashboard/'
@@ -496,6 +508,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   RegistrationRoute: typeof RegistrationRoute
   PaymentVerifyRoute: typeof PaymentVerifyRoute
 }
@@ -507,6 +520,13 @@ declare module '@tanstack/react-router' {
       path: '/registration'
       fullPath: '/registration'
       preLoaderRoute: typeof RegistrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -842,6 +862,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   RegistrationRoute: RegistrationRoute,
   PaymentVerifyRoute: PaymentVerifyRoute,
 }
